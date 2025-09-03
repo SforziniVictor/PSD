@@ -26,12 +26,31 @@ type expr =
   | Prim of string * expr * expr
   | CondExpress of expr * expr * expr;;
 
+type aexpr = 
+  | ACstI of int //Needs to be named something different compared to expr
+  | AVar of string // --//--
+  | Add of aexpr * aexpr
+  | Mul of aexpr * aexpr
+  | Sub of aexpr * aexpr;;
+
 let e1 = CstI 17;;
 
 let e2 = Prim("+", CstI 3, Var "a");;
 
 let e3 = Prim("+", Prim("*", Var "b", CstI 9), Var "a");;
 
+
+//Exercise 1.2
+let ae1 : aexpr = Sub(AVar("v"), 
+            Add(AVar("w"),AVar("z")));;
+
+let ae2 : aexpr  = Mul(ACstI(2), 
+            Sub(AVar("v"),
+              Add(AVar("w"), AVar("z"))));;
+
+let ae3 : aexpr  = Add(AVar "x", 
+          Add(AVar "y", 
+          Add(AVar "z", AVar "w")));;
 
 (* Evaluation within an environment *)
 
@@ -49,7 +68,45 @@ let rec eval e (env : (string * int) list) : int =
       | "max" -> if (i1 > i2) then i1 else i2
       | "min" -> if (i1 < i2) then i1 else i2
       | "==" -> if(i1 = i2) then 1 else 0 
-      | _ -> failwith "unknown primitive";;
+      | _ -> failwith "unknown primitive"
+    | CondExpress(e1, e2, e3) ->
+      match eval e1 env with
+      | 0 -> eval e3 env
+      | _ -> eval e2 env
+
+let rec fmt (ae: aexpr) : string =
+  match ae with
+  | ACstI(i) -> sprintf "%d" i
+  | Add(ae1, ae2) -> sprintf "(%s + %s)" (fmt ae1) (fmt ae2)
+  | Mul(ae1, ae2) -> sprintf "(%s * %s)" (fmt ae1) (fmt ae2)
+  | Sub(ae1, ae2) -> sprintf "(%s - %s)" (fmt ae1) (fmt ae2)
+  | _ -> "not int";;
+
+let rec simplify (ae: aexpr) : aexpr =
+  match ae with 
+  | Add(ae1, ae2) ->
+    match (ae1, ae2) with
+    | (ACstI(0), i) -> i
+    | (i, ACstI(0)) -> i
+    | _ -> Add(ae1, ae2)
+  | Sub(ae1, ae2) ->
+    match (ae1, ae2) with
+    | (ACstI(0), i) -> i
+    | (i, ACstI(0)) -> i
+    | (ACstI(x), ACstI(y)) when x = y -> ACstI(0)
+    | _ -> Add(ae1, ae2)
+  | ACstI(i) -> ACstI(i);;
+
+(*
+  0 + e −→ e
+  e + 0 −→ e
+  e − 0 −→ e
+1 ∗ e −→ e
+e ∗ 1 −→ e
+0 ∗ e −→ 0
+e ∗ 0 −→ 0
+  e − e −→ 0
+*)
 
 let e1v  = eval e1 env;;
 let e2v1 = eval e2 env;;
