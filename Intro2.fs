@@ -86,27 +86,27 @@ let rec simplify (ae: aexpr) : aexpr =
   match ae with 
   | Add(ae1, ae2) ->
     match (ae1, ae2) with
-    | (ACstI(0), i) -> i
-    | (i, ACstI(0)) -> i
-    | _ -> Add(ae1, ae2)
+    | (ACstI(0), i) -> simplify i
+    | (i, ACstI(0)) -> simplify i
+    | _ -> Add(simplify ae1, simplify ae2)
   | Sub(ae1, ae2) ->
     match (ae1, ae2) with
-    | (ACstI(0), i) -> i
-    | (i, ACstI(0)) -> i
+    | (ACstI(0), i) -> simplify i
+    | (i, ACstI(0)) -> simplify i
     | (ACstI(x), ACstI(y)) when x = y -> ACstI(0)
-    | _ -> Add(ae1, ae2)
+    | _ -> Sub(simplify ae1, simplify ae2)
+  | Mul(ae1, ae2) ->
+    match (ae1, ae2) with
+    | (ACstI(1), i) -> simplify i
+    | (i, ACstI(1)) -> simplify i
+    | (ACstI(0), i) -> ACstI(0)
+    | (i, ACstI(0)) -> ACstI(0)
+    | _ -> Mul(simplify ae1, simplify ae2)
   | ACstI(i) -> ACstI(i);;
 
-(*
-  0 + e −→ e
-  e + 0 −→ e
-  e − 0 −→ e
-1 ∗ e −→ e
-e ∗ 1 −→ e
-0 ∗ e −→ 0
-e ∗ 0 −→ 0
-  e − e −→ 0
-*)
+
+
+let rec fmt2 (ae: aexpr) : string 
 
 let e1v  = eval e1 env;;
 let e2v1 = eval e2 env;;

@@ -48,6 +48,8 @@ class Prim extends Expr {
       return e1.eval(env) * e2.eval(env);
     else if (oper.equals("-"))
       return e1.eval(env) - e2.eval(env);
+    else if (oper.equals("max"))
+      return e1.eval(env) - e2.eval(env);
     else
       throw new RuntimeException("unknown primitive");
   } 
