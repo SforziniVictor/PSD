@@ -364,9 +364,29 @@ let s3 = scomp e3 [];;
 let s5 = scomp e5 [];;
 
 (* Output the integers in list inss to the text file called fname: *)
+(*HERE WE SOLVED 2.4*)
+let sinstrToInt (s: sinstr): List<int> =
+    match s with
+    | SCstI(i) -> [0; i]                 
+    | SVar(i) -> [1;i]                  
+    | SAdd -> [2]
+    | SSub -> [3]                         
+    | SMul -> [4]                         
+    | SPop -> [5]                          
+    | SSwap -> [6];;
+
+let assemble (s: sinstr list): int list =
+    let rec aux s acc =
+        match s with
+        | [] -> acc
+        | x :: xs ->
+            aux xs (acc @ sinstrToInt x)
+    aux s []
+        
 
 let intsToFile (inss : int list) (fname : string) = 
     let text = String.concat " " (List.map string inss)
     System.IO.File.WriteAllText(fname, text);;
 
 (* -----------------------------------------------------------------  *)
+intsToFile (assemble s1) ("file.txt")
